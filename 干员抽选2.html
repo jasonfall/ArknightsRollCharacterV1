@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干员随机抽选生成器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b, #ff7e5f);
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 2px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input[type="number"] {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button.primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        button.primary:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        button.primary:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+        
+        button.secondary:hover {
+            background: linear-gradient(135deg, #27ae60, #219653);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        button.copy {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            box-shadow: 0 4px 10px rgba(155, 89, 182, 0.3);
+        }
+        
+        button.copy:hover {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(155, 89, 182, 0.4);
+        }
+        
+        #outputSection {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .result-container {
+            background: #e3f2fd;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .result-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .result-content {
+            padding: 25px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            background: white;
+        }
+        
+        .group {
+            margin-bottom: 25px;
+        }
+        
+        .group-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .number {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+            animation: popIn 0.3s ease forwards;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .error {
+            background: #ffeef0;
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #e74c3c;
+            display: none;
+        }
+        
+        .info {
+            background: #e8f4fc;
+            color: #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #3498db;
+            font-size: 0.95rem;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(52, 152, 219, 0.2);
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                padding: 16px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .number {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-random"></i> 干员随机抽选生成器</h1>
+        
+        <div class="input-section">
+            <label for="inputNumber">请输入你的精二六星干员数量：</label>
+            <div class="input-group">
+                <input type="number" id="inputNumber" min="16" step="1" placeholder="需≥16才能生成结果（目前全六星干员共112个）">
+                <button id="generateBtn" class="primary">
+                    <i class="fas fa-cogs"></i> 生成随机数
+                </button>
+            </div>
+            <div class="info">
+                <i class="fas fa-info-circle"></i> 输入≥16的正整数后点击生成按钮，系统将自动创建两组干员抽选结果
+            </div>
+            <div id="errorMsg" class="error">
+                <i class="fas fa-exclamation-triangle"></i> <span id="errorText">请输入一个≥16的正整数</span>
+            </div>
+        </div>
+        
+        <div class="loading" id="loadingSection">
+            <div class="spinner"></div>
+            <p>正在生成随机干员抽选结果...</p>
+        </div>
+        
+        <div id="outputSection">
+            <div class="result-container">
+                <div class="result-header">
+                    <i class="fas fa-list-ol"></i> 干员抽选结果
+                </div>
+                <div class="result-content" id="resultOutput">
+                    <div class="group">
+                        <div class="group-title">
+                            <i class="fas fa-caret-right"></i> 第一行干员抽选结果
+                        </div>
+                        <div class="numbers" id="group1Output"></div>
+                    </div>
+                    
+                    <div class="group">
+                        <div class="group-title">
+                            <i class="fas fa-caret-right"></i> 第二行干员抽选结果
+                        </div>
+                        <div class="numbers" id="group2Output"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="regenerateBtn" class="secondary">
+                    <i class="fas fa-sync-alt"></i> 重新生成
+                </button>
+                <button id="copyBtn" class="copy">
+                    <i class="fas fa-copy"></i> 复制结果
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 干员随机抽选生成器 | 兼容移动设备 | 复制功能已优化</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputNumber = document.getElementById('inputNumber');
+            const generateBtn = document.getElementById('generateBtn');
+            const regenerateBtn = document.getElementById('regenerateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const group1Output = document.getElementById('group1Output');
+            const group2Output = document.getElementById('group2Output');
+            const outputSection = document.getElementById('outputSection');
+            const errorMsg = document.getElementById('errorMsg');
+            const errorText = document.getElementById('errorText');
+            const loadingSection = document.getElementById('loadingSection');
+            
+            let currentX = 0;
+            let currentA = 0;
+            let currentB = 0;
+            let group1 = [];
+            let group2 = [];
+            
+            // 生成随机数
+            function generateRandomNumbers() {
+                const x = parseInt(inputNumber.value);
+                
+                // 验证输入
+                if (isNaN(x) || x < 16) {
+                    errorText.textContent = '请输入一个≥16的正整数';
+                    errorMsg.style.display = 'block';
+                    outputSection.style.display = 'none';
+                    return;
+                }
+                
+                errorMsg.style.display = 'none';
+                currentX = x;
+                
+                // 显示加载状态
+                outputSection.style.display = 'none';
+                loadingSection.style.display = 'block';
+                
+                // 计算a和b
+                if (x % 2 === 1) { // 奇数
+                    currentA = Math.floor((x + 1) / 2);
+                    currentB = Math.floor((x - 1) / 2);
+                } else { // 偶数
+                    currentA = Math.floor(x / 2);
+                    currentB = Math.floor(x / 2);
+                }
+                
+                // 延迟显示结果，让加载动画可见
+                setTimeout(() => {
+                    generateAndDisplayNumbers();
+                    loadingSection.style.display = 'none';
+                    outputSection.style.display = 'block';
+                }, 800);
+            }
+            
+            // 生成并显示随机数
+            function generateAndDisplayNumbers() {
+                // 生成第一组随机数 (1~a)
+                group1 = generateUniqueRandomNumbers(1, currentA, 8);
+                
+                // 生成第二组随机数 (1~b)
+                group2 = generateUniqueRandomNumbers(1, currentB, 8);
+                
+                // 显示结果
+                displayNumbers(group1, group1Output);
+                displayNumbers(group2, group2Output);
+            }
+            
+            // 显示数字到DOM
+            function displayNumbers(numbers, container) {
+                container.innerHTML = '';
+                numbers.forEach(num => {
+                    const numElement = document.createElement('div');
+                    numElement.className = 'number';
+                    numElement.textContent = num;
+                    numElement.style.animationDelay = `${Math.random() * 0.3}s`;
+                    container.appendChild(numElement);
+                });
+            }
+            
+            // 生成不重复的随机数
+            function generateUniqueRandomNumbers(min, max, count) {
+                if (max - min + 1 < count) {
+                    // 如果范围小于需要的数量，则使用所有数字
+                    return Array.from({length: max - min + 1}, (_, i) => min + i)
+                        .concat(Array.from({length: count - (max - min + 1)}, (_, i) => min + (i % (max - min + 1))))
+                        .slice(0, count)
+                        .sort((a, b) => a - b);
+                }
+                
+                const numbers = new Set();
+                while (numbers.size < count) {
+                    const num = Math.floor(Math.random() * (max - min + 1)) + min;
+                    numbers.add(num);
+                }
+                
+                return Array.from(numbers).sort((a, b) => a - b);
+            }
+            
+            // 复制结果到剪贴板（兼容移动端）
+            function copyToClipboard() {
+                try {
+                    const text = `第一行干员抽选结果：${group1.join(', ')}\n第二行干员抽选结果：${group2.join(', ')}`;
+                    
+                    // 创建一个临时的textarea元素
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.setAttribute('readonly', '');
+                    textarea.style.position = 'absolute';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    
+                    // 选择文本
+                    textarea.select();
+                    textarea.setSelectionRange(0, textarea.value.length);
+                    
+                    // 尝试复制
+                    const successful = document.execCommand('copy');
+                    
+                    // 移除临时元素
+                    document.body.removeChild(textarea);
+                    
+                    if (successful) {
+                        showNotification('结果已复制到剪贴板！', 'success');
+                    } else {
+                        showNotification('自动复制失败，请手动复制结果', 'warning');
+                    }
+                } catch (err) {
+                    console.error('复制失败: ', err);
+                    showNotification('复制失败，请手动复制结果', 'error');
+                }
+            }
+            
+            // 显示通知
+            function showNotification(message, type) {
+                // 移除现有的通知
+                const existingNotification = document.querySelector('.notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+                
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle'}"></i> ${message}`;
+                document.body.appendChild(notification);
+                
+                // 显示通知
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // 3秒后隐藏通知
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+            
+            // 事件监听
+            generateBtn.addEventListener('click', generateRandomNumbers);
+            regenerateBtn.addEventListener('click', generateAndDisplayNumbers);
+            copyBtn.addEventListener('click', copyToClipboard);
+            
+            // 允许按Enter键提交
+            inputNumber.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    generateRandomNumbers();
+                }
+            });
+            
+            // 输入时隐藏错误信息
+            inputNumber.addEventListener('input', function() {
+                errorMsg.style.display = 'none';
+            });
+        });
+    </script>
+    
+    <style>
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+        
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+    </style>
+</body>
+</html>
